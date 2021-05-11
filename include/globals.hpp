@@ -9,9 +9,7 @@ extern volatile bool b_Input_Rocker_Manual;
 extern volatile bool b_Input_Rocker_Remote;
 
 extern volatile int i_DriveTargetPower;
-extern volatile int i_DriveCurrentPower;
-extern volatile int i_DriveLimit;
-
+extern volatile int i_SteerPower;
 extern volatile float f_PowerVolt;
 extern volatile float f_PowerAmp;
 

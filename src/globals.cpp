@@ -9,8 +9,7 @@ volatile bool b_Input_Rocker_Manual;
 volatile bool b_Input_Rocker_Remote;
 
 volatile int i_DriveTargetPower;
-volatile int i_DriveCurrentPower;
-volatile int i_DriveLimit;
+volatile int i_SteerPower;
 
 volatile float f_PowerVolt;
 volatile float f_PowerAmp;
@@ -25,10 +24,9 @@ void InitialiseGlobals(){
     b_Input_Rocker_Manual = false;
     b_Input_Rocker_Remote = false;
 
-    i_DriveCurrentPower = 0;
-    i_DriveLimit = 0;
     i_DriveTargetPower = 0;
-
+    i_SteerPower = 0;
+    
     f_PowerAmp = 0;
     f_PowerVolt = 0;
 

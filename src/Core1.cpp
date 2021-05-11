@@ -26,9 +26,7 @@ void SendUpdateToClient(){
     objControls["ToggleManual"] = b_Input_Rocker_Manual;
     objControls["ToggleRemote"] = b_Input_Rocker_Remote;
     objControls["Gear"] = b_Input_Gear;
-    objDrive["Current"] = i_DriveCurrentPower;
     objDrive["Target"] = i_DriveTargetPower;
-    objDrive["Limit"] = i_DriveLimit;
     objDrive["Lights"] = b_EnableLights;
     objPower["Volt"] = f_PowerVolt;
     objPower["Amp"] = f_PowerAmp;
@@ -37,8 +35,8 @@ void SendUpdateToClient(){
     serializeJson(baseDocument, output);
     if(SerialBT.hasClient()){
         SerialBT.print(output);
-        SerialBT.print(0x0a);
-        Serial.println("Sent to BT");
+        SerialBT.print('\n');
+        Serial.println(output);
     }
     else{
         //Serial.println(output);
@@ -87,10 +85,27 @@ void InitialiseCore1(){
     objPower["Amp"] = 1.0;
 }
 
+DynamicJsonDocument rcvDoc(512);
+
 void RunCore1(){
     unsigned long thisMillis = millis();
     if(thisMillis > sendUpdate){
         sendUpdate = thisMillis + updateInterval;
         SendUpdateToClient();
+    }
+    if(SerialBT.hasClient()){
+        //Check for read
+        if(SerialBT.available()){
+            String cmd = SerialBT.readStringUntil('\n');
+            deserializeJson(rcvDoc, cmd);
+            JsonObject response = rcvDoc["Control"];
+            b_LocalControl = response.getMember("LocalControl");
+            if(!b_LocalControl){
+                i_DriveTargetPower = response.getMember("Drive").as<int>() * 1000;
+                i_SteerPower = response.getMember("Steer").as<int>() * 1000;
+                b_EnableLights = response.getMember("Lights").as<bool>();
+            }
+            Serial.println(cmd);
+        }
     }
 }

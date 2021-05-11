@@ -4,11 +4,14 @@
 #include <esp_task_wdt.h>
 #include <PCF8574.h>
 #include <Adafruit_INA219.h>
-
+#include "MotorControl.hpp"
 PCF8574 PCF(0x22);
 Adafruit_INA219 ina219;
 
 TaskHandle_t secondCoreTask;
+
+MotorControl* pDriveMotor;
+MotorControl* pDriveSteer;
 
 
 void Core0Run(void*);
@@ -62,6 +65,8 @@ void Core0Setup(){
     if (ina219.begin()) {
         Serial.println("Connected to INA219 chip");
     }   
+    pDriveMotor = new MotorControl(16,17,0,1);
+    pDriveSteer = new MotorControl(18,19,2,3);
 }
 
 void Core0Loop(){
@@ -127,47 +132,44 @@ void GpioUpdate(){
      bool bPedal = gpioState & 0b0000001;
      bool bSwitch = gpioState & 0b0000010;
      bool bGear = gpioState & 0b0000100;
-     bool bRockerManual = gpioState & 0b0001000;
      bool bRockerRemote = gpioState & 0b0010000;
-     bool controlChanged = false;
      
     // PCF8574 is pulled up and driven to ground, logic is inverted here
     
      if(bPedal == b_Input_Pedal){
          b_Input_Pedal = !bPedal;
-         controlChanged = true;
      }
 
      if(bSwitch == b_Input_Switch){
          b_Input_Switch = !bSwitch;
-         controlChanged = true;
      }
 
      if(bGear == b_Input_Gear){
          b_Input_Gear = !bGear;
-         controlChanged = true;
-     }
-
-     if(bRockerManual == b_Input_Rocker_Manual){
-         b_Input_Rocker_Manual = !bRockerManual;
-         controlChanged = true;
      }
 
      if(bRockerRemote == b_Input_Rocker_Remote){
          b_Input_Rocker_Remote = !bRockerRemote;
-         controlChanged = true;
+         b_Input_Rocker_Manual = bRockerRemote;
      }
 
-     if(b_LocalControl){
+     if(b_LocalControl || b_Input_Rocker_Manual){
+         
          if(b_Input_Pedal)
          {
-             i_DriveTargetPower = i_DriveLimit;
+             if(!i_DriveTargetPower){
+                 Serial.println("Engaging Motor");
+             }
+             i_DriveTargetPower = 1000;
          }
          else
          {
+             if(i_DriveTargetPower){
+                 Serial.println("Disabling motor");
+             }
             i_DriveTargetPower = 0;
          }
-         if(b_Input_Gear){
+         if(!b_Input_Gear){
              i_DriveTargetPower *= -1;
          }
 
@@ -176,7 +178,10 @@ void GpioUpdate(){
 }
 
 void PwmUpdate(){
-
+    pDriveMotor->WritePower(i_DriveTargetPower);
+    if(!b_LocalControl){
+        pDriveSteer->WritePower(i_SteerPower);
+    }
 }
 void PowerUpdate(){
   float shuntvoltage = 0;
