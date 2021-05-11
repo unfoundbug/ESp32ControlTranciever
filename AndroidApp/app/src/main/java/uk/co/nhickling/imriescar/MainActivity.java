@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
 
     private LinearLayout blockHeader, blockControls, blockFooter;
 
-    private Button btn_Forward, btn_Reverse, btn_Left, btn_Right;
+    private ImageButton btn_Forward, btn_Reverse, btn_Left, btn_Right;
 
     private Timer tmrUpdate = new Timer();
 
@@ -100,10 +101,10 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
         tv_nerd_volt = (TextView)findViewById(R.id.lbl_Volt);
         tv_nerd_amp = (TextView)findViewById(R.id.lbl_Amp);
 
-        btn_Forward = (Button)findViewById(R.id.btn_Forward);
-        btn_Reverse = (Button)findViewById(R.id.btn_Reverse);
-        btn_Left = (Button)findViewById(R.id.btn_Left);
-        btn_Right = (Button)findViewById(R.id.btn_Right);
+        btn_Forward = (ImageButton)findViewById(R.id.btn_Forward);
+        btn_Reverse = (ImageButton)findViewById(R.id.btn_Reverse);
+        btn_Left = (ImageButton)findViewById(R.id.btn_Left);
+        btn_Right = (ImageButton)findViewById(R.id.btn_Right);
 
         try {
             carState = new DeviceState();

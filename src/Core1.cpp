@@ -36,7 +36,6 @@ void SendUpdateToClient(){
     if(SerialBT.hasClient()){
         SerialBT.print(output);
         SerialBT.print('\n');
-        Serial.println(output);
     }
     else{
         //Serial.println(output);
@@ -105,7 +104,6 @@ void RunCore1(){
                 i_SteerPower = response.getMember("Steer").as<int>() * 1000;
                 b_EnableLights = response.getMember("Lights").as<bool>();
             }
-            Serial.println(cmd);
         }
     }
 }

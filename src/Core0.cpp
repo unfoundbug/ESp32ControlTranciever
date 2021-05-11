@@ -6,7 +6,7 @@
 #include <Adafruit_INA219.h>
 #include "MotorControl.hpp"
 PCF8574 PCF(0x22);
-Adafruit_INA219 ina219;
+Adafruit_INA219 ina219(0x40);
 
 TaskHandle_t secondCoreTask;
 
@@ -196,4 +196,11 @@ void PowerUpdate(){
   
   f_PowerVolt = loadvoltage;
   f_PowerAmp = current_mA / 1000;
+
+  Serial.print("Updating power: bus-");
+  Serial.print(busvoltage);
+  Serial.print(" currentma-");
+  Serial.println(current_mA);
+
+
 }
