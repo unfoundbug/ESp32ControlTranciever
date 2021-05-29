@@ -64,9 +64,16 @@ void Core0Setup(){
     }
     if (ina219.begin()) {
         Serial.println("Connected to INA219 chip");
+        ina219.setCalibration_32V_2A();
+        if(ina219.success()){
+            Serial.println("Ina219 calibration success");
+        }
+        else{
+            Serial.println("Ina219 calibration fault");
+        }
     }   
-    pDriveMotor = new MotorControl(16,17,0,1);
-    pDriveSteer = new MotorControl(18,19,2,3);
+    pDriveMotor = new MotorControl(16,17,0,1, 50);
+    pDriveSteer = new MotorControl(18,19,2,3, 100);
 }
 
 void Core0Loop(){

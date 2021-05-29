@@ -14,6 +14,7 @@ unsigned long updateInterval = 500;
 DynamicJsonDocument baseDocument(2048);
 BluetoothSerial SerialBT;
 
+bool bWasConnected = false;
 
 void SendUpdateToClient(){
 
@@ -104,6 +105,16 @@ void RunCore1(){
                 i_SteerPower = response.getMember("Steer").as<int>() * 1000;
                 b_EnableLights = response.getMember("Lights").as<bool>();
             }
+        }
+        bWasConnected = true;
+    }
+    else{
+        if(bWasConnected){
+            Serial.println("Disconnection, disabling output");
+            bWasConnected = false;
+            i_DriveTargetPower = 0;
+            i_SteerPower = 0;
+            b_EnableLights = false;
         }
     }
 }
