@@ -72,8 +72,8 @@ void Core0Setup(){
             Serial.println("Ina219 calibration fault");
         }
     }   
-    pDriveMotor = new MotorControl(16,17,0,1, 50);
-    pDriveSteer = new MotorControl(18,19,2,3, 100);
+    pDriveMotor = new MotorControl(17,16,18,19,0,1, 50);
+    pDriveSteer = new MotorControl(22,21,23,25,2,3, 200);
 }
 
 void Core0Loop(){
@@ -203,11 +203,4 @@ void PowerUpdate(){
   
   f_PowerVolt = loadvoltage;
   f_PowerAmp = current_mA / 1000;
-
-  Serial.print("Updating power: bus-");
-  Serial.print(busvoltage);
-  Serial.print(" currentma-");
-  Serial.println(current_mA);
-
-
 }
