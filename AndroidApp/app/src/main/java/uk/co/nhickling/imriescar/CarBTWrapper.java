@@ -159,7 +159,7 @@ public class CarBTWrapper {
         m_deviceAdapter = BluetoothAdapter.getDefaultAdapter();
         if(m_deviceAdapter.isEnabled()){
             final UUID SERIAL_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //UUID for serial connection
-            m_device = m_deviceAdapter.getRemoteDevice("F0:08:D1:D3:90:A6");
+            m_device = m_deviceAdapter.getRemoteDevice("8C:AA:B5:8C:94:72");
             try {
                 m_socket = m_device.createRfcommSocketToServiceRecord(SERIAL_UUID);
             } catch (IOException e) { return false;}

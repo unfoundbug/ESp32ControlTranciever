@@ -29,6 +29,8 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
     private SeekBar sbSpeedLimit = null;
     private TextView tvSpeedLimit = null;
 
+    private GaugeView g_volt, g_amp;
+
     private Switch sw_Pedal, sw_Gear, sw_Switch, sw_Manual, swRemoteControl;
     TextView tv_nerd_volt, tv_nerd_amp;
 
@@ -38,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
     private LinearLayout blockHeader, blockControls, blockFooter;
 
     private ImageButton btn_Forward, btn_Reverse, btn_Left, btn_Right;
+
+    private ImageButton btn_FwLe, btn_FwRi, btn_ReLe, btn_ReRi;
 
     private Timer tmrUpdate = new Timer();
 
@@ -70,12 +74,16 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
         blockFooter = (LinearLayout)findViewById(R.id.block_Footer);
         nerdStatDetail = (TableLayout)findViewById(R.id.block_NerdStatsDetail);
 
-        sbSpeedLimit = (SeekBar)findViewById(R.id.sb_SpeedLimit);
-        tvSpeedLimit = (TextView)findViewById(R.id.lbl_Speed);
+        //sbSpeedLimit = (SeekBar)findViewById(R.id.sb_SpeedLimit);
+        //tvSpeedLimit = (TextView)findViewById(R.id.lbl_Speed);
+
+        this.g_volt = (GaugeView)findViewById(R.id.gauge_Volt);
+        this.g_amp = (GaugeView)findViewById(R.id.gauge_Amp);
+
 
         this.appPreferences.Initialise(getSharedPreferences("AppSettings", MODE_PRIVATE));
         this.nerdStatDetail.setVisibility(this.appPreferences.GetShowNerd() ? View.VISIBLE : View.GONE);
-        this.sbSpeedLimit.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        /*this.sbSpeedLimit.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 appPreferences.SetSpeedLimit(seekBar.getProgress());
@@ -89,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
         this.sbSpeedLimit.setProgress(this.appPreferences.m_iSpeedLimit);
-
+        */
         this.carBT.setEventHandler(this);
 
         sw_Pedal = (Switch)findViewById(R.id.sw_nerd_pedal);
@@ -105,6 +113,11 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
         btn_Reverse = (ImageButton)findViewById(R.id.btn_Reverse);
         btn_Left = (ImageButton)findViewById(R.id.btn_Left);
         btn_Right = (ImageButton)findViewById(R.id.btn_Right);
+
+        btn_FwLe = (ImageButton)findViewById(R.id.btn_ForwardLeft);
+        btn_FwRi = (ImageButton)findViewById(R.id.btn_ForwardRight);
+        btn_ReLe = (ImageButton)findViewById(R.id.btn_ReverseLeft);
+        btn_ReRi = (ImageButton)findViewById(R.id.btn_ReverseRight);
 
         try {
             carState = new DeviceState();
@@ -126,6 +139,22 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
                                                           targetSteer += 1;
                                                       if(btn_Right.isPressed())
                                                           targetSteer -= 1;
+                                                      if(btn_FwLe.isPressed()){
+                                                          targetDrive += 1;
+                                                          targetSteer += 1;
+                                                      }
+                                                      if(btn_FwRi.isPressed()){
+                                                          targetDrive += 1;
+                                                          targetSteer -= 1;
+                                                      }
+                                                      if(btn_ReLe.isPressed()){
+                                                          targetDrive -= 1;
+                                                          targetSteer += 1;
+                                                      }
+                                                      if(btn_ReRi.isPressed()){
+                                                          targetDrive -= 1;
+                                                          targetSteer -= 1;
+                                                      }
                                                       carState.SetRemoteControl(targetDrive,targetSteer,false);
                                                   }
                                                   else
@@ -172,6 +201,8 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
                 sw_Manual.setChecked(renderPacket.Controls_Manual);
                 tv_nerd_volt.setText("Voltage: " + renderPacket.Power_Volt + "V");
                 tv_nerd_amp.setText("Current: " + renderPacket.Power_Amp + "A");
+                g_volt.SetValue((float)renderPacket.Power_Volt);
+                g_amp.SetValue((float)renderPacket.Power_Amp);
             }
         });
 

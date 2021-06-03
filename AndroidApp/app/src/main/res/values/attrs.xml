@@ -1,0 +1,20 @@
+<resources>
+    <declare-styleable name="GaugeView">
+        <attr name="majorMarkerColor" format="color" />
+        <attr name="minorMarkerColor" format="color" />
+
+        <attr name="highBarColor" format="color" />
+        <attr name="medBarColor" format="color" />
+        <attr name="lowBarColor" format="color" />
+
+        <attr name="medTransitionPerc" format="float" />
+        <attr name="highTransitionPerc" format="float" />
+
+        <attr name="minValue" format="float" />
+        <attr name="maxValue" format="float" />
+        <attr name="currentValue" format="float" />
+
+        <attr name="unitOfMeasure" format="string" />
+
+    </declare-styleable>
+</resources>
