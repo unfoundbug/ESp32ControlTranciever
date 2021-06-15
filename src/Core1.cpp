@@ -49,10 +49,10 @@ void InitialiseCore1(){
     WiFi.mode(WIFI_MODE_NULL);
     Serial.println("Starting BT core");
     SerialBT.begin("Imrie_Car");
-    SerialBT.enableSSP();
-
-  const uint8_t* point = esp_bt_dev_get_address();
- 
+    Serial.println("Started BT core");
+    
+    const uint8_t* point = esp_bt_dev_get_address();
+    Serial.print("Got BT core: ");
   for (int i = 0; i < 6; i++) {
  
     char str[3];
@@ -64,8 +64,8 @@ void InitialiseCore1(){
       Serial.print(":");
     }
  
-    Serial.println();
   }
+    Serial.println();
  
 
     JsonObject objControls = baseDocument.createNestedObject("Controls");
@@ -97,13 +97,20 @@ void RunCore1(){
         //Check for read
         if(SerialBT.available()){
             String cmd = SerialBT.readStringUntil('\n');
-            deserializeJson(rcvDoc, cmd);
+            DeserializationError processResult = deserializeJson(rcvDoc, cmd);
+            if(processResult){
             JsonObject response = rcvDoc["Control"];
-            b_LocalControl = response.getMember("LocalControl");
-            if(!b_LocalControl){
-                i_DriveTargetPower = response.getMember("Drive").as<int>() * 1000;
-                i_SteerPower = response.getMember("Steer").as<int>() * 1000;
-                b_EnableLights = response.getMember("Lights").as<bool>();
+                b_LocalControl = response.getMember("LocalControl");
+                if(!b_LocalControl){
+                    i_DriveTargetPower = response.getMember("Drive").as<int>() * 1000;
+                    i_SteerPower = response.getMember("Steer").as<int>() * 1000;
+                    b_EnableLights = response.getMember("Lights").as<bool>();
+                }
+                SerialBT.println("OK");
+            }
+            else{
+                SerialBT.print("ERROR:");
+                SerialBT.println(processResult.c_str());
             }
         }
         bWasConnected = true;

@@ -93,7 +93,12 @@
                         android:layout_height="wrap_content"
                         android:text="Switch" />
                     <LinearLayout android:layout_weight="1" />
-
+                    <TextView
+                        android:id="@+id/lbl_SigStr"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TextView" />
+                    <LinearLayout android:layout_weight="1" />
                     <Switch
                         android:id="@+id/sw_nerd_manual"
                         android:layout_width="wrap_content"
@@ -107,6 +112,12 @@
 
                     <TextView
                         android:id="@+id/lbl_Volt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TextView" />
+                    <LinearLayout android:layout_weight="1" />
+                    <TextView
+                        android:id="@+id/lbl_Ping"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="TextView" />

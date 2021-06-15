@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
     private GaugeView g_volt, g_amp;
 
     private Switch sw_Pedal, sw_Gear, sw_Switch, sw_Manual, swRemoteControl;
-    TextView tv_nerd_volt, tv_nerd_amp;
+    TextView tv_nerd_volt, tv_nerd_amp, tv_nerd_Ping, tv_nerd_Sig;
 
     private LinearLayout nerdStats = null;
     private TableLayout nerdStatDetail = null;
@@ -62,6 +62,61 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
         blockControls.setVisibility(View.GONE);
         blockFooter.setVisibility(View.GONE);
     }
+
+    TimerTask sendUpdate = new TimerTask() {
+        @Override
+        public void run() {
+            try {
+                if(swRemoteControl.isChecked()){
+                    int targetDrive = 0;
+                    int targetSteer = 0;
+                    if(btn_Forward.isPressed())
+                        targetDrive += 1;
+                    if(btn_Reverse.isPressed())
+                        targetDrive -= 1;
+                    if(btn_Left.isPressed())
+                        targetSteer += 1;
+                    if(btn_Right.isPressed())
+                        targetSteer -= 1;
+                    if(btn_FwLe.isPressed()){
+                        targetDrive += 1;
+                        targetSteer += 1;
+                    }
+                    if(btn_FwRi.isPressed()){
+                        targetDrive += 1;
+                        targetSteer -= 1;
+                    }
+                    if(btn_ReLe.isPressed()){
+                        targetDrive -= 1;
+                        targetSteer += 1;
+                    }
+                    if(btn_ReRi.isPressed()){
+                        targetDrive -= 1;
+                        targetSteer -= 1;
+                    }
+                    carState.SetRemoteControl(targetDrive,targetSteer,false);
+                }
+                else
+                {
+                    carState.SetLocalControl();
+                }
+                final long tts = carBT.SendUpdate(carState);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tv_nerd_Ping.setText(Long.toString(tts) + "ms");
+                    }
+                });
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (java.io.IOException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +163,10 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
 
         tv_nerd_volt = (TextView)findViewById(R.id.lbl_Volt);
         tv_nerd_amp = (TextView)findViewById(R.id.lbl_Amp);
+        tv_nerd_Ping = (TextView)findViewById(R.id.lbl_Ping);
+        tv_nerd_Sig = (TextView)findViewById(R.id.lbl_SigStr);
+
+
 
         btn_Forward = (ImageButton)findViewById(R.id.btn_Forward);
         btn_Reverse = (ImageButton)findViewById(R.id.btn_Reverse);
@@ -124,54 +183,10 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        tmrUpdate.scheduleAtFixedRate(new TimerTask() {
-                                          @Override
-                                          public void run() {
-                                              try {
-                                                  if(swRemoteControl.isChecked()){
-                                                      int targetDrive = 0;
-                                                      int targetSteer = 0;
-                                                      if(btn_Forward.isPressed())
-                                                          targetDrive += 1;
-                                                      if(btn_Reverse.isPressed())
-                                                          targetDrive -= 1;
-                                                      if(btn_Left.isPressed())
-                                                          targetSteer += 1;
-                                                      if(btn_Right.isPressed())
-                                                          targetSteer -= 1;
-                                                      if(btn_FwLe.isPressed()){
-                                                          targetDrive += 1;
-                                                          targetSteer += 1;
-                                                      }
-                                                      if(btn_FwRi.isPressed()){
-                                                          targetDrive += 1;
-                                                          targetSteer -= 1;
-                                                      }
-                                                      if(btn_ReLe.isPressed()){
-                                                          targetDrive -= 1;
-                                                          targetSteer += 1;
-                                                      }
-                                                      if(btn_ReRi.isPressed()){
-                                                          targetDrive -= 1;
-                                                          targetSteer -= 1;
-                                                      }
-                                                      carState.SetRemoteControl(targetDrive,targetSteer,false);
-                                                  }
-                                                  else
-                                                  {
-                                                      carState.SetLocalControl();
-                                                  }
-                                                  carBT.SendUpdate(carState);
-                                              } catch (JSONException e) {
-                                                  e.printStackTrace();
-                                              } catch (java.io.IOException ex)
-                                              {
-                                                  ex.printStackTrace();
-                                              }
-                                          }
-                                      },
-                250, 250);
+        tmrUpdate.scheduleAtFixedRate(sendUpdate,250, 250);
     }
+
+
 
     public void btnclick_StartConnection(View view){
         if(this.carBT.Initialise()){

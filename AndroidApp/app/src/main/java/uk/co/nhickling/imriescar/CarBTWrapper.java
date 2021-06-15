@@ -15,6 +15,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Timer;
 import java.util.UUID;
 
 public class CarBTWrapper {
@@ -28,6 +31,14 @@ public class CarBTWrapper {
     private OutputStreamWriter m_streamWriter;
     private BufferedReader m_streamBufferRead;
     private Thread m_handleThread;
+
+    private String DeviceAddress = "8C:AA:B5:8C:94:72";
+
+    public CarBTWrapper(){
+        Reset();
+
+        m_deviceAdapter = BluetoothAdapter.getDefaultAdapter();
+    }
 
     public class DataPacket{
         private String source;
@@ -104,14 +115,20 @@ public class CarBTWrapper {
                             readLine = m_streamBufferRead.readLine();//ReadLine(m_streamReader);
                         } catch (IOException e) {
                             e.printStackTrace();
+                            continue;
                         }
-                        DataPacket dp = null;
-                        try {
-                            dp = new DataPacket(readLine);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        if(readLine.startsWith("{")) {
+                            DataPacket dp = null;
+                            try {
+                                dp = new DataPacket(readLine);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            eventHandler.NewDataRecieved(dp);
                         }
-                        eventHandler.NewDataRecieved(dp);
+                        else{
+                            replyRecieved.signal();
+                        }
                     }
                 }
             }
@@ -145,21 +162,52 @@ public class CarBTWrapper {
         }
     }
 
-    public void SendUpdate(DeviceState state) throws IOException {
+    public class ThreadEvent {
+
+        private Object lock = new Object();
+
+        public void signal() {
+            synchronized (lock) {
+                lock.notify();
+            }
+        }
+
+        public void reset(){
+            lock = new Object();
+        }
+
+        public void await() throws InterruptedException {
+            synchronized (lock) {
+                lock.wait();
+            }
+        }
+    }
+
+    final ThreadEvent replyRecieved = new ThreadEvent();
+
+    public long SendUpdate(DeviceState state) throws IOException {
         if(m_streamWriter != null)
         if(m_socket.isConnected()){
+            replyRecieved.reset();
             m_streamWriter.write(state.getMessage() + '\n');
+            Instant before = Instant.now();
             m_streamWriter.flush();
+            try {
+                replyRecieved.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Duration timeSpan = Duration.between(before, Instant.now());
+            return timeSpan.toMillis();
         }
+        return -1;
     }
 
     public boolean Initialise(){
         Reset();
-
-        m_deviceAdapter = BluetoothAdapter.getDefaultAdapter();
         if(m_deviceAdapter.isEnabled()){
             final UUID SERIAL_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //UUID for serial connection
-            m_device = m_deviceAdapter.getRemoteDevice("8C:AA:B5:8C:94:72");
+            m_device = m_deviceAdapter.getRemoteDevice(DeviceAddress);
             try {
                 m_socket = m_device.createRfcommSocketToServiceRecord(SERIAL_UUID);
             } catch (IOException e) { return false;}
