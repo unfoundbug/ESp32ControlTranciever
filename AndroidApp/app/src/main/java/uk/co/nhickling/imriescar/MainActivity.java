@@ -178,11 +178,8 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
         btn_ReLe = (ImageButton)findViewById(R.id.btn_ReverseLeft);
         btn_ReRi = (ImageButton)findViewById(R.id.btn_ReverseRight);
 
-        try {
-            carState = new DeviceState();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        carState = null;
+
         tmrUpdate.scheduleAtFixedRate(sendUpdate,250, 250);
     }
 

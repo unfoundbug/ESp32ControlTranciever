@@ -3,8 +3,6 @@ package uk.co.nhickling.imriescar;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.os.ParcelUuid;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,10 +15,13 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Timer;
+import java.util.Set;
 import java.util.UUID;
 
 public class CarBTWrapper {
+
+    final UUID SERIAL_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //UUID for serial connection
+
     private BluetoothAdapter m_deviceAdapter;
     private BluetoothDevice m_device;
     private BluetoothSocket m_socket;
@@ -30,15 +31,163 @@ public class CarBTWrapper {
     private InputStreamReader m_streamReader;
     private OutputStreamWriter m_streamWriter;
     private BufferedReader m_streamBufferRead;
-    private Thread m_handleThread;
 
-    private String DeviceAddress = "8C:AA:B5:8C:94:72";
+    private boolean initialised = false;
+
+    private Thread m_handleThread;
 
     public CarBTWrapper(){
         Reset();
 
         m_deviceAdapter = BluetoothAdapter.getDefaultAdapter();
     }
+
+    private Runnable deviceManagement = new Runnable() {
+
+        private String ReadLine(InputStreamReader sr) throws IOException {
+            StringBuilder sb = new StringBuilder();
+            int readByte = sr.read();
+            while (readByte>-1 && readByte!= '\n')
+            {
+                sb.append((char) readByte);
+                readByte = sr.read();
+            }
+            return sb.length()==0?null:sb.toString();
+        }
+
+        @Override
+        public void run() {
+            for(;;) {
+                try {
+                    Reset();
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if(m_deviceAdapter.isEnabled())
+                {
+                    Set<BluetoothDevice> devices = m_deviceAdapter.getBondedDevices();
+                    m_device = null;
+                    for(BluetoothDevice device : devices)
+                    {
+                        if(device.getName() == "Imrie_Car") {
+                            m_device = device;
+                        }
+                    }
+                    if(m_device == null){
+                        continue;
+                    }
+                    try {
+                        m_socket = m_device.createRfcommSocketToServiceRecord(SERIAL_UUID);
+                    } catch (IOException e) {
+                        continue;
+                    }
+                    eventHandler.DeviceConnected();
+
+                    try {
+                        m_socket.connect();
+                        m_outputStream = m_socket.getOutputStream();
+                        m_inputStream = m_socket.getInputStream();
+                        m_streamReader = new InputStreamReader(m_inputStream);
+                        m_streamWriter = new OutputStreamWriter(m_outputStream);
+                        m_streamBufferRead = new BufferedReader(m_streamReader);
+                        for(;;){
+                        if(m_socket.isConnected()){
+                                String readLine = null;
+                                try {
+                                    readLine = m_streamBufferRead.readLine();//ReadLine(m_streamReader);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    continue;
+                                }
+                                if(readLine.startsWith("{")) {
+                                    DataPacket dp = null;
+                                    try {
+                                        dp = new DataPacket(readLine);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    eventHandler.NewDataRecieved(dp);
+                                }
+                                else{
+                                    replyRecieved.signal();
+                                }
+                            }
+                        }
+
+                    } catch (IOException e) {
+                        eventHandler.DeviceConnectionLost();
+                        continue;
+                    }
+                }
+            }
+        }
+    };
+
+    public class ThreadEvent {
+
+        private Object lock = new Object();
+
+        public void signal() {
+            synchronized (lock) {
+                lock.notify();
+            }
+        }
+
+        public void reset(){
+            lock = new Object();
+        }
+
+        public void await() throws InterruptedException {
+            synchronized (lock) {
+                lock.wait();
+            }
+        }
+    }
+
+    final ThreadEvent replyRecieved = new ThreadEvent();
+
+    public long SendUpdate(DeviceState state) throws IOException {
+        if(m_streamWriter != null)
+        if(m_socket.isConnected()){
+            replyRecieved.reset();
+            m_streamWriter.write(state.getMessage() + '\n');
+            Instant before = Instant.now();
+            m_streamWriter.flush();
+            try {
+                replyRecieved.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Duration timeSpan = Duration.between(before, Instant.now());
+            return timeSpan.toMillis();
+        }
+        return -1;
+    }
+
+    public void Initialise(){
+        if(initialised)
+        {
+            return;
+        }
+        initialised = true;
+
+        m_handleThread = new Thread(deviceManagement);
+        m_handleThread.start();
+    }
+
+    public void Reset(){
+        m_streamBufferRead = null;
+        m_socket = null;
+        m_streamReader = null;
+        m_streamWriter = null;
+        m_inputStream = null;
+        m_outputStream = null;
+        m_device = null;
+        m_deviceAdapter = null;
+    }
+
 
     public class DataPacket{
         private String source;
@@ -84,159 +233,21 @@ public class CarBTWrapper {
 
         }
     }
+
     public interface PacketHandlerInterface{
+
+        public void DeviceFound();
+
+        public void DeviceConnected();
+
+        public void DeviceConnectionLost();
+
         public void NewDataRecieved(DataPacket packet);
     }
     private PacketHandlerInterface eventHandler;
+
     public void setEventHandler(PacketHandlerInterface packetInterface){
-            this.eventHandler = packetInterface;
+        this.eventHandler = packetInterface;
     }
 
-    Runnable handleCommunications = new Runnable() {
-
-        private String ReadLine(InputStreamReader sr) throws IOException {
-            StringBuilder sb = new StringBuilder();
-            int readByte = sr.read();
-            while (readByte>-1 && readByte!= '\n')
-            {
-                sb.append((char) readByte);
-                readByte = sr.read();
-            }
-            return sb.length()==0?null:sb.toString();
-        }
-
-        @Override
-        public void run() {
-            for(;;){
-                if(m_streamBufferRead != null){
-                    if(m_socket.isConnected()){
-                        String readLine = null;
-                        try {
-                            readLine = m_streamBufferRead.readLine();//ReadLine(m_streamReader);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            continue;
-                        }
-                        if(readLine.startsWith("{")) {
-                            DataPacket dp = null;
-                            try {
-                                dp = new DataPacket(readLine);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            eventHandler.NewDataRecieved(dp);
-                        }
-                        else{
-                            replyRecieved.signal();
-                        }
-                    }
-                }
-            }
-        }
-    };
-
-    public static class DeviceState{
-        JSONObject rootObject;
-        public DeviceState() throws JSONException {
-            rootObject = new JSONObject();
-        }
-
-        public void SetLocalControl() throws JSONException {
-            rootObject = new JSONObject();
-            JSONObject controlObject = new JSONObject();
-            controlObject.put("LocalControl", true);
-            rootObject.put("Control", controlObject);
-        }
-
-        public void SetRemoteControl(int driveDirection, int steerDirection, boolean lights) throws JSONException {
-            rootObject = new JSONObject();
-            JSONObject controlObject = new JSONObject();
-            controlObject.put("LocalControl", false);
-            controlObject.put("Drive", driveDirection);
-            controlObject.put("Steer", steerDirection);
-            controlObject.put("Lights", lights);
-            rootObject.put("Control", controlObject);
-        }
-        public String getMessage(){
-            return rootObject.toString();
-        }
-    }
-
-    public class ThreadEvent {
-
-        private Object lock = new Object();
-
-        public void signal() {
-            synchronized (lock) {
-                lock.notify();
-            }
-        }
-
-        public void reset(){
-            lock = new Object();
-        }
-
-        public void await() throws InterruptedException {
-            synchronized (lock) {
-                lock.wait();
-            }
-        }
-    }
-
-    final ThreadEvent replyRecieved = new ThreadEvent();
-
-    public long SendUpdate(DeviceState state) throws IOException {
-        if(m_streamWriter != null)
-        if(m_socket.isConnected()){
-            replyRecieved.reset();
-            m_streamWriter.write(state.getMessage() + '\n');
-            Instant before = Instant.now();
-            m_streamWriter.flush();
-            try {
-                replyRecieved.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            Duration timeSpan = Duration.between(before, Instant.now());
-            return timeSpan.toMillis();
-        }
-        return -1;
-    }
-
-    public boolean Initialise(){
-        Reset();
-        if(m_deviceAdapter.isEnabled()){
-            final UUID SERIAL_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //UUID for serial connection
-            m_device = m_deviceAdapter.getRemoteDevice(DeviceAddress);
-            try {
-                m_socket = m_device.createRfcommSocketToServiceRecord(SERIAL_UUID);
-            } catch (IOException e) { return false;}
-
-            try {
-                m_socket.connect();
-                m_outputStream = m_socket.getOutputStream();
-                m_inputStream = m_socket.getInputStream();
-                m_streamReader = new InputStreamReader(m_inputStream);
-                m_streamWriter = new OutputStreamWriter(m_outputStream);
-                m_streamBufferRead = new BufferedReader(m_streamReader);
-                m_handleThread = new Thread(this.handleCommunications);
-                m_handleThread.start();
-                return true;
-            } catch (IOException e) {
-                return false;
-            }
-        }
-        return false;
-    }
-
-    public void Reset(){
-        m_streamBufferRead = null;
-        m_socket = null;
-        m_streamReader = null;
-        m_streamWriter = null;
-        m_inputStream = null;
-        m_outputStream = null;
-        m_device = null;
-        m_deviceAdapter = null;
-    }
 }
