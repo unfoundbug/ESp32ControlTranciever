@@ -22,7 +22,6 @@ public class CarBTWrapper {
 
     final UUID SERIAL_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //UUID for serial connection
 
-    private BluetoothAdapter m_deviceAdapter;
     private BluetoothDevice m_device;
     private BluetoothSocket m_socket;
     private InputStream m_inputStream;
@@ -38,8 +37,6 @@ public class CarBTWrapper {
 
     public CarBTWrapper(){
         Reset();
-
-        m_deviceAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
     private Runnable deviceManagement = new Runnable() {
@@ -57,6 +54,7 @@ public class CarBTWrapper {
 
         @Override
         public void run() {
+            BluetoothAdapter m_deviceAdapter = BluetoothAdapter.getDefaultAdapter();
             for(;;) {
                 try {
                     Reset();
@@ -71,19 +69,23 @@ public class CarBTWrapper {
                     m_device = null;
                     for(BluetoothDevice device : devices)
                     {
-                        if(device.getName() == "Imrie_Car") {
+                        String deviceName = device.getName();
+                        if(deviceName.equals("Imrie_Car")){
                             m_device = device;
                         }
                     }
                     if(m_device == null){
                         continue;
                     }
+
+                    eventHandler.DeviceFound();
+
                     try {
                         m_socket = m_device.createRfcommSocketToServiceRecord(SERIAL_UUID);
                     } catch (IOException e) {
                         continue;
                     }
-                    eventHandler.DeviceConnected();
+
 
                     try {
                         m_socket.connect();
@@ -92,6 +94,7 @@ public class CarBTWrapper {
                         m_streamReader = new InputStreamReader(m_inputStream);
                         m_streamWriter = new OutputStreamWriter(m_outputStream);
                         m_streamBufferRead = new BufferedReader(m_streamReader);
+                        eventHandler.DeviceConnected();
                         for(;;){
                         if(m_socket.isConnected()){
                                 String readLine = null;
@@ -185,7 +188,6 @@ public class CarBTWrapper {
         m_inputStream = null;
         m_outputStream = null;
         m_device = null;
-        m_deviceAdapter = null;
     }
 
 

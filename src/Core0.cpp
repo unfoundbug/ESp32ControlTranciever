@@ -72,8 +72,8 @@ void Core0Setup(){
             Serial.println("Ina219 calibration fault");
         }
     }   
-    pDriveMotor = new MotorControl(17,16,18,19,0,1, 50);
-    pDriveSteer = new MotorControl(22,21,23,25,2,3, 200);
+    pDriveMotor = new MotorControl(23,25,21,0,1, 50);
+    pDriveSteer = new MotorControl(22,19,16,2,3, 200);
 }
 
 void Core0Loop(){

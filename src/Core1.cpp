@@ -39,7 +39,7 @@ void SendUpdateToClient(){
         SerialBT.print('\n');
     }
     else{
-        //Serial.println(output);
+        Serial.println(output);
     }
 }
 

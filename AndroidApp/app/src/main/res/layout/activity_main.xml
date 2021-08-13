@@ -28,315 +28,52 @@
             android:id="@+id/block_Header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_weight="0"
+            tools:visibility="visible">
+        </LinearLayout>
 
-            <Button
-                android:id="@+id/btn_Connect"
+        <GridLayout
+
+            android:id="@+id/view_stats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <include
+                android:id="@+id/include_nerdStats"
+                layout="@layout/layout_nerdstats"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="btnclick_StartConnection"
-                android:text="Attempt Connection" />
+                android:layout_weight="0" />
 
-            <TextView
-                android:id="@+id/lbl_ConnectionState"
-                android:layout_width="match_parent"
+        </GridLayout>
+
+        <GridLayout
+            android:id="@+id/view_controls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <include
+                android:id="@+id/include_nerdStats"
+                layout="@layout/layout_controls"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="3" />
-        </LinearLayout>
+                android:layout_weight="0" />
 
-        <LinearLayout
-            android:id="@+id/block_NerdStats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <Button
-                android:id="@+id/btn_ToggleNerd"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="btnclick_ToggleNerdStats"
-                android:text="Toggle Nerd Stats" />
-
-            <TableLayout
-                android:id="@+id/block_NerdStatsDetail"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <Switch
-                        android:id="@+id/sw_nerd_pedal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Pedal" />
-                    <LinearLayout android:layout_weight="1" />
-
-                    <Switch
-                        android:id="@+id/sw_nerd_gear"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Gear" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <Switch
-                        android:id="@+id/sw_nerd_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Switch" />
-                    <LinearLayout android:layout_weight="1" />
-                    <TextView
-                        android:id="@+id/lbl_SigStr"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="TextView" />
-                    <LinearLayout android:layout_weight="1" />
-                    <Switch
-                        android:id="@+id/sw_nerd_manual"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Manual" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
-
-                    <TextView
-                        android:id="@+id/lbl_Volt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="TextView" />
-                    <LinearLayout android:layout_weight="1" />
-                    <TextView
-                        android:id="@+id/lbl_Ping"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="TextView" />
-                    <LinearLayout android:layout_weight="1" />
-                    <TextView
-                        android:id="@+id/lbl_Amp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="TextView" />
-                </TableRow>
-
-            </TableLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/block_Controls"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <uk.co.nhickling.imriescar.GaugeView
-                    android:id="@+id/gauge_Volt"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_weight="0"
-                    custom:unitOfMeasure="V" />
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"/>
-
-                <uk.co.nhickling.imriescar.GaugeView
-                    android:id="@+id/gauge_Amp"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_weight="0"
-                    custom:lowBarColor="#FFCECECE"
-                    custom:maxValue="3"
-                    custom:minValue="0"
-                    custom:unitOfMeasure="A" />
-
-            </LinearLayout>
-
-            <Switch
-                android:id="@+id/sw_RemoteControl"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:showText="true"
-                android:text="Remote control"
-                android:textOff="Car"
-                android:textOn="Phone" />
-
-            <LinearLayout
-                android:id="@+id/block_CtrlLocal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:visibility="gone"></LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/block_CtrlRemote"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:visibility="visible">
-
-                <TableLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"></LinearLayout>
-
-                        <ImageButton
-                            android:id="@+id/btn_ForwardLeft"
-                            android:layout_width="75dp"
-                            android:layout_height="75dp"
-                            android:layout_weight="0"
-                            app:srcCompat="@drawable/ic_baseline_arrow_drop_up_24" />
-
-                        <ImageButton
-                            android:id="@+id/btn_Forward"
-                            android:layout_width="75dp"
-                            android:layout_height="75dp"
-                            android:layout_weight="0"
-                            app:srcCompat="@drawable/ic_baseline_arrow_drop_up_24" />
-
-                        <ImageButton
-                            android:id="@+id/btn_ForwardRight"
-                            android:layout_width="75dp"
-                            android:layout_height="75dp"
-                            android:layout_weight="0"
-                            app:srcCompat="@drawable/ic_baseline_arrow_drop_up_24" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"></LinearLayout>
-                    </TableRow>
-
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" >
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="3"
-                            android:orientation="horizontal" />
-
-                        <ImageButton
-                            android:id="@+id/btn_Left"
-                            android:layout_centerHorizontal="true"
-                            android:layout_width="75dp"
-                            android:layout_height="75dp"
-                            android:layout_weight="0"
-                            app:srcCompat="@drawable/ic_baseline_arrow_left_24" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="0.5"
-                            android:orientation="horizontal" />
-
-                        <ImageButton
-                            android:id="@+id/btn_Right"
-                            android:layout_width="75dp"
-                            android:layout_height="75dp"
-                            android:layout_weight="0"
-                            app:srcCompat="@drawable/ic_baseline_arrow_right_24" />
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="3"
-                            android:orientation="horizontal" />
-                    </TableRow>
-
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"></LinearLayout>
-
-                        <ImageButton
-                            android:id="@+id/btn_ReverseLeft"
-                            android:layout_width="75dp"
-                            android:layout_height="75dp"
-                            android:layout_weight="0"
-                            app:srcCompat="@drawable/ic_baseline_arrow_drop_up_24" />
-
-
-                        <ImageButton
-                                android:id="@+id/btn_Reverse"
-                                android:layout_width="75dp"
-                                android:layout_height="75dp"
-                                android:layout_weight="0"
-                                app:srcCompat="@drawable/ic_baseline_arrow_drop_down_24" />
-
-                        <ImageButton
-                            android:id="@+id/btn_ReverseRight"
-                            android:layout_width="75dp"
-                            android:layout_height="75dp"
-                            android:layout_weight="0"
-                            app:srcCompat="@drawable/ic_baseline_arrow_drop_up_24" />
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:orientation="horizontal"></LinearLayout>
-                    </TableRow>
-
-                </TableLayout>
-            </LinearLayout>
-        </LinearLayout>
+        </GridLayout>
 
         <LinearLayout
             android:id="@+id/block_Footer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:visibility="gone"
+            android:layout_weight="0"
             tools:visibility="visible">
 
             <TextView
-                android:id="@+id/textView7"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="TextView" />
-
-            <Button
-                android:id="@+id/btn_Reset"
+                android:id="@+id/label_Status"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:onClick="btnclick_Reset"
-                android:text="Reset Connection" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
     </LinearLayout>

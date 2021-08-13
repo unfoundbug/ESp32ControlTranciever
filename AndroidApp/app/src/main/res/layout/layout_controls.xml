@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/tools">
+
+
+
+    <Switch
+        android:id="@+id/sw_RemoteControl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:showText="true"
+        android:text="Remote control"
+        android:textOff="Car"
+        android:textOn="Phone" />
+
+    <LinearLayout
+        android:id="@+id/block_CtrlLocal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone"></LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/block_CtrlRemote"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"></LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/btn_ForwardLeft"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_weight="0"
+                    app:srcCompat="@drawable/ic_baseline_arrow_drop_up_24" />
+
+                <ImageButton
+                    android:id="@+id/btn_Forward"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_weight="0"
+                    app:srcCompat="@drawable/ic_baseline_arrow_drop_up_24" />
+
+                <ImageButton
+                    android:id="@+id/btn_ForwardRight"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_weight="0"
+                    app:srcCompat="@drawable/ic_baseline_arrow_drop_up_24" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"></LinearLayout>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:orientation="horizontal" />
+
+                <ImageButton
+                    android:id="@+id/btn_Left"
+                    android:layout_centerHorizontal="true"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_weight="0"
+                    app:srcCompat="@drawable/ic_baseline_arrow_left_24" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:orientation="horizontal" />
+
+                <ImageButton
+                    android:id="@+id/btn_Right"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_weight="0"
+                    app:srcCompat="@drawable/ic_baseline_arrow_right_24" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:orientation="horizontal" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"></LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/btn_ReverseLeft"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_weight="0"
+                    app:srcCompat="@drawable/ic_baseline_arrow_drop_up_24" />
+
+
+                <ImageButton
+                    android:id="@+id/btn_Reverse"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_weight="0"
+                    app:srcCompat="@drawable/ic_baseline_arrow_drop_down_24" />
+
+                <ImageButton
+                    android:id="@+id/btn_ReverseRight"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_weight="0"
+                    app:srcCompat="@drawable/ic_baseline_arrow_drop_up_24" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"></LinearLayout>
+            </TableRow>
+
+        </TableLayout>
+    </LinearLayout>
+</FrameLayout>

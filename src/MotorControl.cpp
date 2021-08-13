@@ -2,15 +2,14 @@
 
 #include <Arduino.h>
 
-MotorControl::MotorControl(int left_En, int left_Pwm, int right_En, int right_Pwm, int pwmChan1, int pwmChan2, int driveRamp)
+MotorControl::MotorControl(int driver_en, int left_Pwm, int right_Pwm, int pwmChan1, int pwmChan2, int driveRamp)
 {
 
     currentPower = 0;
 
     this->chan1 = pwmChan1;
     this->chan2 = pwmChan2;
-    this->chan1Enable = left_En;
-    this->chan2Enable = right_En;
+    this->chanEnable = driver_en;
     this->driveRamp = driveRamp;
 
     ledcSetup(pwmChan1, 5000, 10);
@@ -21,8 +20,7 @@ MotorControl::MotorControl(int left_En, int left_Pwm, int right_En, int right_Pw
     ledcAttachPin(right_Pwm, pwmChan2);
     ledcWrite(pwmChan2, 0);
 
-    pinMode(this->chan1Enable, GPIO_MODE_OUTPUT);
-    pinMode(this->chan2Enable, GPIO_MODE_OUTPUT);
+    pinMode(this->chanEnable, GPIO_MODE_OUTPUT);
 
 }
 
@@ -38,23 +36,19 @@ void MotorControl::WritePower(int newPower)
     if(targetPower == 0){
         ledcWrite(this->chan1, 0);
         ledcWrite(this->chan2, 0);
-        digitalWrite(this->chan1Enable, 0);
-        digitalWrite(this->chan2Enable, 0);
+        digitalWrite(this->chanEnable, 0);
         currentPower = 0;
     }
     else{
         int targetChannel = this->chan1;
-
         if(targetPower < 0)
         {
             targetPower *= -1;
             targetChannel = this->chan2;
-            digitalWrite(this->chan2Enable, 1);
-        }
-        else{
-         digitalWrite(this->chan1Enable, 1);
+            
         }
 
+        digitalWrite(this->chanEnable, 1);
         ledcWrite(targetChannel, targetPower);
     }
 }
