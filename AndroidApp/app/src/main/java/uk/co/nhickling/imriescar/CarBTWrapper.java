@@ -95,15 +95,12 @@ public class CarBTWrapper {
                         m_streamWriter = new OutputStreamWriter(m_outputStream);
                         m_streamBufferRead = new BufferedReader(m_streamReader);
                         eventHandler.DeviceConnected();
-                        for(;;){
-                        if(m_socket.isConnected()){
+                        for(;;)
+                        {
+                            if(m_socket.isConnected()){
                                 String readLine = null;
-                                try {
-                                    readLine = m_streamBufferRead.readLine();//ReadLine(m_streamReader);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    continue;
-                                }
+                                readLine = m_streamBufferRead.readLine();//ReadLine(m_streamReader);
+
                                 if(readLine.startsWith("{")) {
                                     DataPacket dp = null;
                                     try {

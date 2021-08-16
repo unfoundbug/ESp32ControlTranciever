@@ -97,8 +97,10 @@ void RunCore1(){
         //Check for read
         if(SerialBT.available()){
             String cmd = SerialBT.readStringUntil('\n');
+            Serial.print(cmd);
+
             DeserializationError processResult = deserializeJson(rcvDoc, cmd);
-            if(processResult){
+            if(processResult.code() == DeserializationError::Code::Ok){
             JsonObject response = rcvDoc["Control"];
                 b_LocalControl = response.getMember("LocalControl");
                 if(!b_LocalControl){
@@ -107,11 +109,14 @@ void RunCore1(){
                     b_EnableLights = response.getMember("Lights").as<bool>();
                 }
                 SerialBT.println("OK");
+                Serial.println("OK");
             }
             else{
                 SerialBT.print("ERROR:");
                 SerialBT.println(processResult.c_str());
+                Serial.println("ERROR");
             }
+            
         }
         bWasConnected = true;
     }

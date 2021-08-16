@@ -34,29 +34,45 @@
         </LinearLayout>
 
         <GridLayout
-
-            android:id="@+id/view_stats"
-            android:layout_width="wrap_content"
+            android:id="@+id/view_gauges"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <include
-                android:id="@+id/include_nerdStats"
-                layout="@layout/layout_nerdstats"
-                android:layout_width="wrap_content"
+                android:id="@+id/include_gauges"
+                layout="@layout/layout_gauges"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0" />
 
         </GridLayout>
 
         <GridLayout
+
+            android:id="@+id/view_stats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <include
+                android:id="@+id/include_nerdStats"
+                layout="@layout/layout_nerdstats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0" />
+
+        </GridLayout>
+
+
+
+        <GridLayout
             android:id="@+id/view_controls"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <include
                 android:id="@+id/include_nerdStats"
                 layout="@layout/layout_controls"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0" />
 
