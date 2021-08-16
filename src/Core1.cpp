@@ -104,8 +104,17 @@ void RunCore1(){
             JsonObject response = rcvDoc["Control"];
                 b_LocalControl = response.getMember("LocalControl");
                 if(!b_LocalControl){
-                    i_DriveTargetPower = response.getMember("Drive").as<int>() * 1000;
-                    i_SteerPower = response.getMember("Steer").as<int>() * 1000;
+                    int newSteer = response.getMember("Steer").as<int>() * 1000;
+                    int newDrive = response.getMember("Drive").as<int>() * 1000;
+                    if(newSteer != i_SteerPower && newDrive != i_DriveTargetPower)
+                    {
+                        i_DriveTargetPower = newDrive;
+                    } 
+                    else
+                    {
+                        i_DriveTargetPower = newDrive;
+                        i_SteerPower = newSteer;
+                    }
                     b_EnableLights = response.getMember("Lights").as<bool>();
                 }
                 SerialBT.println("OK");

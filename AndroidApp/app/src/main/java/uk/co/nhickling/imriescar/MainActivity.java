@@ -68,6 +68,14 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
                         targetDrive -= 1;
                         targetSteer -= 1;
                     }
+                    if(targetSteer < -1)
+                        targetSteer = -1;
+                    if(targetSteer > 1)
+                        targetSteer = 1;
+                    if(targetDrive < -1)
+                        targetDrive = -1;
+                    if(targetDrive > 1)
+                        targetDrive = 1;
                     carState = DeviceState.SetRemoteControl(targetDrive,targetSteer,false);
                 }
                 else
@@ -111,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements CarBTWrapper.Pack
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                label_Status.setText("Device has been found. Connecting...");
+                label_Status.setText("Found paired device. Attempting connection...");
             }
         });
     }

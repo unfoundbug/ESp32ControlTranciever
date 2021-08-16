@@ -118,6 +118,11 @@ public class CarBTWrapper {
 
                     } catch (IOException e) {
                         eventHandler.DeviceConnectionLost();
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException interruptedException) {
+                            interruptedException.printStackTrace();
+                        }
                         continue;
                     }
                 }
@@ -141,7 +146,7 @@ public class CarBTWrapper {
 
         public void await() throws InterruptedException {
             synchronized (lock) {
-                lock.wait();
+                lock.wait(500);
             }
         }
     }
@@ -152,7 +157,11 @@ public class CarBTWrapper {
         if(m_streamWriter != null)
         if(m_socket.isConnected()){
             replyRecieved.reset();
-            m_streamWriter.write(state.getMessage() + '\n');
+            try {
+                m_streamWriter.write(state.getMessage() + '\n');
+            } catch (NullPointerException npe){
+                return -2;
+            }
             Instant before = Instant.now();
             m_streamWriter.flush();
             try {
