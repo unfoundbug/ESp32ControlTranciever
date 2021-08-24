@@ -8,19 +8,26 @@
 #include "esp_bt_main.h"
 #include "esp_bt_device.h"
 
+#include <IBusBM.h>
+
 unsigned long sendUpdate = 0;
 unsigned long updateInterval = 500;
 
 DynamicJsonDocument baseDocument(2048);
 BluetoothSerial SerialBT;
 
+IBusBM IBus;    // IBus object
+
 bool bWasConnected = false;
+
+int radioDrive, radioSteer, radioRev, radioEn, radioLights;
 
 void SendUpdateToClient(){
 
     JsonObject objControls = baseDocument["Controls"];
     JsonObject objDrive = baseDocument["Drive"];
     JsonObject objPower = baseDocument["Power"];
+    JsonObject objRC = baseDocument["RC"];
 
     objControls["Pedal"] = b_Input_Pedal;
     objControls["Switch"] = b_Input_Switch;
@@ -28,9 +35,17 @@ void SendUpdateToClient(){
     objControls["ToggleRemote"] = b_Input_Rocker_Remote;
     objControls["Gear"] = b_Input_Gear;
     objDrive["Target"] = i_DriveTargetPower;
+    objDrive["Steer"] = i_SteerPower;
     objDrive["Lights"] = b_EnableLights;
     objPower["Volt"] = f_PowerVolt;
     objPower["Amp"] = f_PowerAmp;
+
+    objRC["radioDrive"] = radioDrive;
+    objRC["radioSteer"] = radioSteer;
+    objRC["radioRev"] = radioRev;
+    objRC["radioEn"] = radioEn;
+    objRC["radioLights"] = radioLights;
+
 
     String output;
     serializeJson(baseDocument, output);
@@ -71,24 +86,39 @@ void InitialiseCore1(){
     JsonObject objControls = baseDocument.createNestedObject("Controls");
     JsonObject objDrive = baseDocument.createNestedObject("Drive");
     JsonObject objPower = baseDocument.createNestedObject("Power");
-    objControls["Pedal"] = 0;
-    objControls["Switch"] = 0;
-    objControls["ToggleManual"] = 0;
-    objControls["ToggleRemote"] = 0;
-    objControls["Gear"] = 0;
-    objDrive["Current"] = 0;
-    objDrive["Target"] = 0;
-    objDrive["Limit"] = 0;
-    objDrive["Lights"] = 0;
-    objDrive["Mode"] = "Remote";
-    objPower["Volt"] = 11.1;
-    objPower["Amp"] = 1.0;
+    JsonObject objRC = baseDocument.createNestedObject("RC");
+    
+    IBus.begin(Serial2,IBUSBM_NOTIMER, 18,17);    // iBUS object connected to serial2 RX2 pin and use timer 1
+
+    Serial.println("Initialised RC Core");
 }
 
 DynamicJsonDocument rcvDoc(512);
 
 void RunCore1(){
     unsigned long thisMillis = millis();
+
+    IBus.loop();
+
+    radioDrive = IBus.readChannel(2);
+    radioSteer = IBus.readChannel(3);
+    radioRev = IBus.readChannel(6);
+    radioEn = IBus.readChannel(7);
+    radioLights = IBus.readChannel(4);
+
+    if(radioEn == 2000)
+    {
+        if(radioRev == 1500)
+            i_DriveTargetPower = 0;
+        else if(radioRev == 2000)
+            i_DriveTargetPower = (1000 - radioDrive);    
+        else
+            i_DriveTargetPower = (radioDrive - 1000);
+        
+        i_SteerPower = (radioSteer - 1500) * 2;
+        b_EnableLights = radioLights > 1500;
+    }
+
     if(thisMillis > sendUpdate){
         sendUpdate = thisMillis + updateInterval;
         SendUpdateToClient();
@@ -103,7 +133,7 @@ void RunCore1(){
             if(processResult.code() == DeserializationError::Code::Ok){
             JsonObject response = rcvDoc["Control"];
                 b_LocalControl = response.getMember("LocalControl");
-                if(!b_LocalControl){
+                if(!b_LocalControl && (radioEn != 2000)){
                     int newSteer = response.getMember("Steer").as<int>() * 1000;
                     int newDrive = response.getMember("Drive").as<int>() * 1000;
                     if(newSteer != i_SteerPower && newDrive != i_DriveTargetPower)
